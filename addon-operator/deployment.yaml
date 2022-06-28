@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: addon-operator-manager
+  labels:
+    app.kubernetes.io/name: addon-operator
+  annotations:
+    packages.thetechnick.ninja/phase: deploy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: addon-operator
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: addon-operator
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/infra
+                operator: Exists
+            weight: 1
+      volumes:
+      - name: kubeconfig
+        secret:
+          secretName: "{{.metadata.name}}-kubeconfig"
+          optional: false
+      containers:
+      - name: manager
+        image: quay.io/app-sre/addon-operator-manager:main
+        env:
+        - name: KUBECONFIG
+          value: /data/kubernetes.kubeconfig
+        # args:
+        # - --enable-leader-election
+        volumeMounts:
+        - name: kubeconfig
+          mountPath: /data
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 100m
+            memory: 400Mi
+          requests:
+            cpu: 100m
+            memory: 300Mi

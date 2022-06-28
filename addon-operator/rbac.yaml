@@ -1,0 +1,123 @@
+apiVersion: permissions.thetechnick.ninja/v1alpha1
+kind: PermissionClaim
+metadata:
+  name: {{.metadata.name}}
+  annotations:
+    packages.thetechnick.ninja/phase: rbac
+spec:
+  namespace: addon-operator
+  secretName: "{{.metadata.name}}-kubeconfig"
+  rules:
+  - apiGroups:
+    - ""
+    resources:
+    - events
+    verbs:
+    - create
+  - apiGroups:
+    - coordination.k8s.io
+    resources:
+    - leases
+    verbs:
+    - get
+    - list
+    - watch
+    - create
+    - update
+    - patch
+    - delete
+  clusterRules:
+  - apiGroups:
+    - "addons.managed.openshift.io"
+    resources:
+    - addons
+    - addons/status
+    - addons/finalizers
+    - addonoperators
+    - addonoperators/status
+    - addonoperators/finalizers
+    - addoninstances
+    - addoninstances/status
+    verbs:
+    - get
+    - list
+    - watch
+    - update
+    - patch
+  - apiGroups:
+    - "addons.managed.openshift.io"
+    resources:
+    - addonoperators
+    - addonoperators/status
+    - addonoperators/finalizers
+    - addoninstances
+    - addoninstances/status
+    verbs:
+    - create
+  - apiGroups:
+    - ""
+    resources:
+    - namespaces
+    - secrets
+    verbs:
+    - create
+    - get
+    - list
+    - watch
+    - update
+    - patch
+    - delete
+  - apiGroups:
+    - operators.coreos.com
+    resources:
+    - operatorgroups
+    - catalogsources
+    - subscriptions
+    verbs:
+    - create
+    - delete
+    - update
+    - watch
+    - get
+    - list
+    - patch
+  - apiGroups:
+    - operators.coreos.com
+    resources:
+    - clusterserviceversions
+    verbs:
+    - watch
+    - get
+    - list
+  - apiGroups:
+    - config.openshift.io
+    resources:
+    - clusterversions
+    verbs:
+    - watch
+    - get
+    - list
+  - apiGroups:
+    - monitoring.coreos.com
+    resources:
+    - servicemonitors
+    verbs:
+    - create
+    - delete
+    - update
+    - watch
+    - get
+    - list
+    - patch
+  - apiGroups:
+    - networking.k8s.io
+    resources:
+    - networkpolicies
+    verbs:
+    - create
+    - delete
+    - update
+    - watch
+    - get
+    - list
+    - patch

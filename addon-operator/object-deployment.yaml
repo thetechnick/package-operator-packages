@@ -1,0 +1,41 @@
+apiVersion: packages.thetechnick.ninja/v1alpha1
+kind: ObjectDeployment
+spec:
+  selector:
+    matchLabels:
+      app: {{.metadata.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.metadata.name}}
+    spec:
+      phases:
+      - name: namespace-crds
+        class: hosted-cluster
+      - name: rbac
+      - name: deploy
+      readinessProbes:
+      - selector:
+          type: Kind
+          kind:
+            group: permissions.thetechnick.ninja
+            kind: PermissionClaim
+        probes:
+        - type: Condition
+          condition:
+            type: Bound
+            status: "True"
+      - selector:
+          type: Kind
+          kind:
+            group: apps
+            kind: Deployment
+        probes:
+        - type: Condition
+          condition:
+            type: Available
+            status: "True"
+        - type: FieldsEqual
+          fieldsEqual:
+            fieldA: .status.updatedReplicas
+            fieldB: .status.replicas
